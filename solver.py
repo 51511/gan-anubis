@@ -142,8 +142,12 @@ def bypass(url, cookie_jar):
             sys.exit(1)
 
     cookies = {c.name: c.value for c in cookie_jar}
-    if "techaro.lol-anubis-auth" in cookies:
-        print("[+] 成功拿到 JWT cookie！")
+    # 動態偵測：找任何包含 "anubis" 且不含 "verification" 的 cookie
+    auth_cookie = next(
+        (k for k in cookies if "anubis" in k and "verification" not in k), None
+    )
+    if auth_cookie:
+        print(f"[+] 成功拿到 JWT cookie！({auth_cookie})")
     else:
         print("[-] 沒有拿到 cookie")
         print(f"    現有 cookies: {list(cookies.keys())}")
