@@ -151,4 +151,4 @@ The goal is to demonstrate that PoW-based bot protection has fundamental limitat
 
 ## License / 授權
 
-MIT
+沒授權，隨便你吧
