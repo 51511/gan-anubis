@@ -1,4 +1,4 @@
-# gan-anubis 淦 Anubis
+# gan-anubis 幹 Anubis
 
 > A minimal, zero-dependency Python PoC that bypasses all three Anubis challenge modes.  
 > 零依賴 Python 概念驗證，繞過 Anubis 全部三種挑戰模式。
@@ -21,8 +21,84 @@
 |---|---|---|
 | RAM | ~500MB | ~20MB |
 | Solve time (difficulty=2) | ~1.35s | **<10ms** |
+| Solve time (difficulty=5) | ~7s+ | **~200ms** |
 | Dependencies | Chrome + Playwright | **None (stdlib only)** |
-| Lines of code | — | ~150 |
+
+### Verified targets / 實測目標
+
+| Site | Difficulty | Mode | Result |
+|------|-----------|------|--------|
+| anubis.techaro.lol | 1 | preact | ✅ |
+| cgit.freebsd.org | 2 | fast | ✅ |
+| bugs.freebsd.org | 2 | fast | ✅ |
+| **git.kernel.org** | **5** | **fast** | **✅ 202ms** |
+
+---
+
+## Install / 安裝
+
+```bash
+pip install gan-anubis
+```
+
+Or clone and install locally / 或本地安裝：
+
+```bash
+git clone https://github.com/your-username/gan-anubis
+cd gan-anubis
+pip install .
+```
+
+---
+
+## Usage / 使用方式
+
+### CLI
+
+```bash
+# Basic / 基本用法
+gan-anubis "https://git.kernel.org/"
+
+# Save cookie for reuse (valid 7 days) / 儲存 cookie 重複使用（有效 7 天）
+gan-anubis "https://git.kernel.org/" --cookie-file cookies.txt
+
+# Custom output filename / 自訂輸出檔名
+gan-anubis "https://git.kernel.org/" --output result.html
+
+# Don't save HTML / 不儲存 HTML
+gan-anubis "https://git.kernel.org/" --no-save
+
+# Quiet mode / 靜默模式
+gan-anubis "https://git.kernel.org/" --quiet --output result.html
+```
+
+### Library / 作為套件使用
+
+```python
+import http.cookiejar
+from gan_anubis import bypass
+
+jar = http.cookiejar.MozillaCookieJar()
+html = bypass("https://git.kernel.org/", cookie_jar=jar)
+print(html[:500])
+
+# Reuse cookie next time / 下次重用 cookie
+jar.save("cookies.txt", ignore_discard=True)
+```
+
+### Example output / 範例輸出
+
+```
+[*] Target: https://git.kernel.org/
+[*] Fetching challenge...
+[*] Algorithm: fast, Difficulty: 5
+[*] Solving PoW...
+[+] Solved! nonce=194413, hash=00000aba01b40da4..., elapsed=202ms
+[*] Submitting solution...
+[+] Got JWT cookie! (techaro.lol-anubis-auth-auth)
+[*] Fetching real content...
+[+] Success! title: Kernel.org git repositories
+```
 
 ---
 
@@ -70,42 +146,6 @@ This PoC was reverse-engineered directly from Anubis source code (`main.mjs`, `p
 
 ---
 
-## Usage / 使用方式
-
-No installation required. Python 3.6+ only.  
-不需要安裝任何套件，Python 3.6+ 即可。
-
-```bash
-# Basic / 基本用法
-python3 solver.py "https://example.com/"
-
-# Save cookie for reuse (valid 7 days) / 儲存 cookie 重複使用（有效 7 天）
-python3 solver.py "https://example.com/" --cookie-file cookies.txt
-
-# Custom output filename / 自訂輸出檔名
-python3 solver.py "https://example.com/" --output result.html
-
-# Don't save HTML / 不儲存 HTML
-python3 solver.py "https://example.com/" --no-save
-```
-
-### Example output / 範例輸出
-
-```
-[*] 目標: https://example.com/
-[*] 取得 challenge...
-[*] 演算法: fast, 難度: 2
-[*] challenge id: 019ea667-c8f8-...
-[*] 計算 PoW...
-[+] 解出！nonce=171, hash=00a3225f..., 耗時=3ms
-[*] 提交答案...
-[+] 成功拿到 JWT cookie！
-[*] 存取真實內容...
-[+] 成功！title: Example Site
-```
-
----
-
 ## How it works / 原理
 
 ```
@@ -113,7 +153,7 @@ python3 solver.py "https://example.com/" --no-save
    → Server returns challenge page with JSON embedded in <script> tag
 
 2. Parse challenge JSON:
-   { "rules": { "algorithm": "fast", "difficulty": 2 },
+   { "rules": { "algorithm": "fast", "difficulty": 5 },
      "challenge": { "id": "...", "randomData": "..." } }
 
 3. Solve based on algorithm:
@@ -121,7 +161,7 @@ python3 solver.py "https://example.com/" --no-save
    metarefresh → return randomData after waiting difficulty × 0.8s
    preact      → return SHA-256(randomData) after waiting difficulty × 0.08s
 
-4. POST solution to /.within.website/x/cmd/anubis/api/pass-challenge
+4. GET /.within.website/x/cmd/anubis/api/pass-challenge?id=...&response=...&nonce=...
    → Server verifies, issues EdDSA-signed JWT cookie (valid 7 days)
 
 5. Use cookie for subsequent requests — no re-solving needed
@@ -132,7 +172,7 @@ python3 solver.py "https://example.com/" --no-save
 ## Tested on / 測試環境
 
 - Anubis `v1.25.1` (latest as of June 2026)
-- Tested on Android (Termux) and Linux x86_64
+- Android (Termux) and Linux x86_64
 - All three challenge modes verified
 
 ---
@@ -151,4 +191,4 @@ The goal is to demonstrate that PoW-based bot protection has fundamental limitat
 
 ## License / 授權
 
-沒授權，隨便你吧
+MIT
