@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "gan-anubis"
+version = "1.0.0"
+description = "Zero-dependency Anubis PoW solver — bypasses fast / metarefresh / preact challenge modes"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.6"
+dependencies = []
+
+keywords = ["anubis", "proof-of-work", "scraper", "bypass", "bot"]
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Internet :: WWW/HTTP",
+    "Topic :: Security",
+]
+
+[project.scripts]
+gan-anubis = "gan_anubis.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/your-username/gan-anubis"
